@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>R Workshop 2024</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Hammed A. Akande" />
+    <meta name="date" content="2024-08-24" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# R Workshop 2024
+]
+.subtitle[
+## Testing Model Assumptions and SLR
+]
+.author[
+### Hammed A. Akande
+]
+.institute[
+### Quantitative and Community Ecology Lab, Concordia University
+]
+.date[
+### 2024-08-24
+]
+
+---
+
+
+
+
+
+class: inverse, center, middle
+
+# Testing Hypothesis of Linear Regression
+
+---
+# Goals of the lecture
+
+- **Understand the assumptions underlying a regression model.**
+
+- **Understand the implications of violating assumptions.**
+
+- **Evaluate regression model assumptions through visual representations and statistical tests.**
+
+- **Identifying observations within regression models.**
+
+
+---
+
+
+# INTRODUCTION- &lt;span style="font-size: 30px;"&gt;What is "Linear"?&lt;/span&gt;
+
+- Recall that a linear regression model has an equation of the form:
+
+$$ Y= a + \beta X +  \epsilon  $$
+
+where: `\(Y\)` = response, `\(X\)` = predictor, `\(\beta\)` = slope, a = intercept and `\(\epsilon\)` = error term.
+
+
+![](images/SLR_pic1.png)
+
+
+---
+
+# Slope &amp; Intercept
+
+## **Slope &lt;span style="font-size: 20px;"&gt;(regression coefficient)&lt;/span&gt;**
+
+- The rate at which the response variable changes with respect to the predictor variable.
+
+--
+
+- It is the change in the response variable for a one-unit change in the predictor variable.
+
+--
+
+  - A slope of 0.6 means that for every 1-unit change in X, there will be a 0.6-unit change in Y.
+
+--
+
+&lt;br&gt;
+
+## **Intercept**
+
+--
+
+- The value of the response variable when the predictor variable is zero.
+
+
+
+
+
+
+---
+#CONTD.
+
+- We then use that equation to estimate our `\(\beta\)` parameter(s) and noted that the individual estimates `\(\hat{\beta}_j\)` are typically assumed to follow a **normal distribution** with _mean_ `\(\beta_j\)` and _variance_. 
+Such that:
+`$$\hat{\beta}_j \sim Normal\left(\beta_j, \sigma^2 M_{jj}  \right)$$`
+where:
+
+**mean** `\(=\)` `\(\beta_j\)`, **variance** `\(=\)`  `\(\sigma^2 M_{jj}\)`, **M** `\(=\)` `\(\left(X^\top X\right)^{-1}\)`
+
+
+
+&lt;br style="margin-bottom: 20px;"&gt;
+
+--
+
+_**But, what about the assumptions underlying the model?**_
+
+
+
+
+---
+class: inverse, center, middle
+
+# Assumptions of Linear Regression Models 
+
+
+---
+# Assumptions of linear regression
+
+Basically, model assumptions are explicitly embedded in a model statement,
+
+`$$Y_i = \beta_0 + \beta_1 x_{i} + \epsilon_i$$`
+
+where `\(\epsilon_i \sim Normal(0, \sigma^2).\)`
+
+
+&lt;br&gt;
+
+--
+
+The assumptions are:
+
+--
+
+- (A): **Linearity**: the response is a linear combination of the predictors. (With noise about this true linear relationship.)
+
+--
+- (B): **Independence**: the errors are independent of each other.
+
+--
+- (C): **Equality of Variance**: the variance of error is the same at any set of predictor values.
+
+--
+- (D): **Normality**: the distribution of the errors typically follow a normal distribution.
+
+
+--
+
+&lt;br style="margin-bottom: 10px;"&gt;
+
+_**Which of those assumptions is most important?**_
+
+
+---
+
+# Assumptions of linear regression
+
+- The **linearity** assumption is encoded in
+
+`$$\beta_0 + \beta_1 x_{i1} + \cdots + \beta_{p-1} x_{i(p-1)}$$`
+
+- while the remaining three, are all encoded in
+
+`$$\epsilon_i \sim Normal(0, \sigma^2)$$`
+
+the `\(\epsilon_i\)` are `\(iid\)` normal random variables with equal variance.
+
+--
+
+&lt;br style="margin-bottom: 10px;"&gt;
+
+- If these assumptions are satisfied, then that's **excellent**! We can make inference, and our conclusions will be reliable.
+
+--
+
+- However, if these assumptions are not fulfilled, we can still perform some test (e.g.,  a t-test in R), but the outcomes will lack **validity**. The distributions of parameter estimates will deviate from expectations, leading to erroneous acceptance or rejection of hypotheses.
+
+
+---
+class: inverse, center, middle
+
+# Assessing Model Assumptions
+
+---
+
+# &lt;span style="font-size: 40px;"&gt;How do we assess our model assumptions?&lt;/span&gt;
+
+
+
+## 1. Fitted vs Residuals Plot
+
+This is one of the most important metrics in checking model assumptions, especially for linearity and equal variance.
+
+
+To demonstrate this method, we can work with (simulated) data from three models:
+
+--
+  - Simulation involves generating (artificial) data that mimic real-world scenarios. 
+
+--
+
+  - To explore the behaviour of the method, assess the performance, test hypotheses, and gain insights into the underlying processes without relying solely on empirical data
+
+
+---
+
+# Generate the data
+
+$$ \text{Model A:} \quad Y = 2 + 10x + \epsilon, \quad \epsilon \sim Normal(0, x^2)$$
+
+`$$\text{Model B:} \quad Y = 2 + 10x + \epsilon, \quad \epsilon \sim Normal(0, 1)$$`
+
+`$$\text{Model C:} \quad Y = 2 + 10x^2 + \epsilon, \quad \epsilon \sim Normal(0, 16)$$`
+
+
+&lt;br style="margin-bottom: 10px;"&gt;
+
+--
+_**Which of the three models defined above do you think would not violate any assumptions?**_
+
+
+
+
+
+
+
+---
+# &lt;span style="font-size: 40px;"&gt;Fitted vs residual plot using (simulated) data:&lt;/span&gt;
+
+Since we said **model B** will show almost no sign of model violation, we'll use that to demonstrate what a "good" plot looks like.
+
+
+
+
+--
+.pull-left[
+- Add the fitted line to the scatterplot.
+![](index_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+]
+
+--
+.pull-right[
+- Add the fitted vs residuals plot.
+![](index_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+]
+
+
+---
+# Evaluate model assumptions
+
+
+Two things here:
+
+--
+
+1. For each fitted value, residuals should be ~ `\(0\)`. If this is true, the assumption of **linearity** is met. Hence, why we added a line at `\(y = 0\)`.
+
+--
+
+2. At every fitted value, the spread/dispersion of the residuals should be relatively constant. If so, the assumption of **equal variance** holds true.
+
+&lt;br&gt;
+
+--
+
+Here, we can observe that both conditions are satisfied. The residuals are centered around zero, and the spread of the residuals is consistent across the range of fitted values. 
+
+
+---
+
+# &lt;span style="font-size: 30px;"&gt;A case of violated assumptions (equal variance)&lt;/span&gt;
+
+
+Now, lets check an instance where  one of the assumptions is violated.
+![](images/regression_pic1_resized.png)
+
+--
+
+&lt;div class="side-note"&gt;
+      &lt;p&gt;
+        The standard error of Y|X is the average variability observed around the regression line for any value of X. It is often assumed to be equal across all values of X.
+      &lt;/p&gt;
+      
+      This is known as the assumption of homoscedasticity or equal variance.
+      
+      &lt;/p&gt;
+
+&lt;/div&gt;  
+
+
+              
+
+
+---
+
+# &lt;span style="font-size: 30px;"&gt;A case of violated assumptions (equal variance)&lt;/span&gt;
+
+We can use **model A** to demonstrate this:
+$$ \text{Model A:} \quad Y = 2 + 10x + \epsilon, \quad \epsilon \sim Normal(0, x^2)$$
+
+--
+.pull-left[
+
+![](index_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+]
+
+--
+.pull-right[
+
+![](index_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# CONTD.
+
+
+&lt;style type="text/css"&gt;
+.side-note {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 300px; 
+  background-color: #f0f0f0;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+&lt;/style&gt;
+
+
+Here, two observations are obvious here.
+
+--
+- Firstly, the residuals appear to be roughly centered around 0 for any given fitted value, indicating that the **linearity** assumption holds. 
+
+--
+
+- However, it's also evident that for higher fitted values, the spread of the residuals increases, indicating a violation of the **constant variance** assumption.
+
+
+
+---
+
+&lt;style type="text/css"&gt;
+.side-note {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 300px; 
+  background-color: #f0f0f0;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.plot-container {
+  display: flex;
+  justify-content: space-between; /* Add space between the plots */
+}
+
+.plot-container img {
+  width: 300%; 
+}
+&lt;/style&gt;
+
+
+# &lt;span style="font-size: 35px;"&gt;A case of Violated assumptions (linearity)&lt;/span&gt;
+
+
+- Next, we will illustrate a model that fails to satisfy the **linearity** assumption.
+
+--
+
+- Recall _Model C_: `$$\quad Y = 2 + 10x^2 + \epsilon, \hspace3ex \epsilon \sim Normal(0, 16)$$`
+
+
+--
+
+- **Model C** serves as an example where `\((Y)\)` is not a linear combination of the predictor. In this scenario, the predictor is `\((x)\)`, but the model incorporates `\((x^2)\)`.
+
+
+---
+
+#CONTD.
+
+.pull-left[
+- Add the fitted line to the scatterplot.
+
+![](index_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+]
+
+
+--
+
+.pull-right[
+- Plot the fitted vs residuals.
+
+![](index_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+
+]
+
+---
+# CONTD
+
+&lt;style type="text/css"&gt;
+.side-note {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 300px; 
+  background-color: #f0f0f0;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+&lt;/style&gt;
+
+
+
+- Here, the linearity assumption is violated. The residuals are not centered around zero for any given fitted value. This is a clear indication that the model is not capturing the true relationship between the predictor and the response.
+
+
+---
+
+# &lt;span style="font-size: 30px;"&gt;Residual Plot for Linearity&lt;/span&gt;
+
+![](images/linearity_plot_2.png)
+
+
+---
+
+# &lt;span style="font-size: 30px;"&gt;Residual Plot for equal variance&lt;/span&gt;
+
+![](images/Homogeneity.png)
+
+
+---
+class: inverse, center, middle
+
+# Normality Assumption
+
+
+---
+
+#Assess Normality assumption
+
+**Histogram** and **QQ plot** are used to assess the normality assumption. The histogram is used to visualize the distribution of the residuals, while the QQ plot is used to compare the distribution of the residuals to the normal distribution.
+
+--
+
+- Histogram
+
+![](index_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+
+
+
+--
+
+**_Looking at the above plots, can you tell me which one appears normal or not?_**
+
+
+---
+
+# &lt;span style="font-size: 40px;"&gt;The quantile-quantile (QQ) plot&lt;/span&gt;
+
+- **Quantiles** (`percentiles`) are points in your dataset below which a certain proportion of your data falls. 
+
+&lt;br&gt;
+
+--
+- `QQ plot` then serves as a visual tool to check whether your data likely originates from a certain theoretical distribution (e.g., normal or exponential distributions).
+
+&lt;br&gt;
+
+--
+
+- Compares the sample quantiles to the quantiles of a theoretical distribution
+
+&lt;br&gt;
+
+--
+- If the two sets of quantiles come from the same distribution, the points will closely follow the line
+
+&lt;br&gt;
+
+--
+- QQ plot is just a **visual** check and so, somewhat subjective
+
+
+
+
+---
+
+# &lt;span style="font-size: 40px;"&gt;The quantile-quantile (QQ) plot&lt;/span&gt;
+
+
+Let's create a Q-Q plot for the residuals of `fit_1`.
+
+--
+
+![](index_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+
+--
+
+- If the data points are "close to the line", then the data is *normally* distributed.
+- y-axis = observed (sample quantiles), and x-axis = expected values (theoretical quantiles).
+
+
+
+---
+
+# &lt;span style="font-size: 25px;"&gt;More on Q-Q Plots&lt;/span&gt; &lt;span style="font-size: 20px;"&gt;(Normal Q-Q Plot from normal &amp; Exponential distribution)&lt;/span&gt;
+
+Simulate data from normal distribution to see how "good" Q-Q plot looks like.
+
+
+![](index_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+
+
+---
+
+# &lt;span style="font-size: 30px;"&gt;QQ Plot from exponential distribution&lt;/span&gt; 
+
+Now, let's simulate data from an exponential distribution and see how the Q-Q plot looks like.
+
+![](index_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+
+
+---
+
+# &lt;span style="font-size: 40px;"&gt;Back to our (simulated) data&lt;/span&gt;
+
+Recall that `fit_1` did not violate any assumption, `fit_2` violated the homogeneity of variance assumption, and `fit_3` violated the linearity assumption.
+
+--
+
+![](index_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
+
+--
+Looking at the above plots, can you tell me which one appears normal or not?
+
+
+
+---
+class: inverse, center, middle
+
+# Formal (statistical) Tests
+
+---
+
+# Statistical Test
+
+Another more formal test that can be used to test the assumption of equality of variance is the **Levene Test and Breusch-Pagan Test**.
+
+--
+
+- Equal variance == **Homogeneity of Variance or Homoscedasticity**.
+
+- Unequal variance == **Heteroscedasticity or heterogeneity of variance**. 
+
+
+--
+
+The Levene Test can be performed using the `leveneTest` function from the `car` package. While the Breusch-Pagan Test can be performed using the `bptest` function from the `lmtest` package.
+
+
+```
+## Loading required package: carData
+```
+
+```
+## Loading required package: zoo
+```
+
+```
+## 
+## Attaching package: 'zoo'
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     as.Date, as.Date.numeric
+```
+
+&lt;br&gt;
+
+--
+The null and alternative hypotheses are as follows:
+
+
+`\(H_0\)`: Homoscedasticity. The errors maintain equal variance about the true model.
+
+`\(H_a\)`: Heteroscedasticity.  The errors exhibit non-equal variance about the true model.
+
+
+---
+# Fit the model
+
+To demonstrate how to use `Breusch-Pagan` test, we will use the three models we have been working with. 
+
+--
+
+Remember,
+
+- `fit_1` had no violation of assumptions (both linearity and equal variance were satisfied),
+
+&lt;br&gt;
+--
+
+- `fit_2` linearity holds but violated the equal variance assumption,
+
+&lt;br&gt;
+--
+
+- `fit_3` equal variance holds, but violated linearity
+
+
+
+---
+
+# Breusch-Pagan Test
+
+The Breusch-Pagan test assesses whether the variance of the residuals in a regression model is constant across different values of the predictor variable.
+
+--
+
+.pull-left[
+- model_1 - `bptest(fit_2)`
+
+
+```
+## 
+## 	studentized Breusch-Pagan test
+## 
+## data:  fit_2
+## BP = 186.2, df = 1, p-value &lt; 2.2e-16
+```
+]
+
+--
+.pull-right[
+
+- model_2 - `bptest(fit_1)`
+
+
+```
+## 
+## 	studentized Breusch-Pagan test
+## 
+## data:  fit_1
+## BP = 0.28014, df = 1, p-value = 0.5966
+```
+]
+
+&lt;br&gt;
+--
+
+- model_3 - `bptest(fit_3)`
+
+
+```
+## 
+## 	studentized Breusch-Pagan test
+## 
+## data:  fit_3
+## BP = 0.68741, df = 1, p-value = 0.407
+```
+
+
+
+---
+
+# &lt;span style="font-size: 40px;"&gt; Levene Test&lt;/span&gt; 
+
+`Levene` test can be used to assess the equality of variances across different groups.
+
+To demonstrate its usefulness, let's use `Circadian_Data.csv` dataset.
+
+--
+.pull-left[
+
+**For context**: the data is about jet lag and adjusting to a different time zone. Campbell and Murphy (1998) claimed people adjust to their new time zone once the light reset their internal, circadian clock. Wright and Czeisler 2002 revisited this study and measured the melatonin production. They subjected 22 people to random treatments; control, knees only and eyes.
+
+Here, we want to compare phase shifts in the circadian rhytm of melatonin productions in participants given another light treatments.
+
+]
+
+--
+
+.pull-right[
+
+
+```
+## Levene's Test for Homogeneity of Variance (center = median)
+##       Df F value Pr(&gt;F)
+## group  2  0.1586 0.8545
+##       19
+```
+
+
+&lt;br&gt;
+
+The P value is &gt; 0.05, there is no evidence to reject the `\(H_0\)` (they have the same variance) and the assumption of **homogeneity** is met
+
+]
+
+
+---
+
+# Shapiro Wilk Test
+
+Shapiro-Wilk test is another test that can be used to test the **normality** of the residuals. The null hypothesis of the test is that the data is normally distributed.
+
+We can use the `shapiro.test()` function in `R` to perform the test.
+
+&lt;br&gt;
+
+--
+
+The null and alternative hypotheses are as follows:
+
+`\(H_0\)`: The data is normally distributed.
+
+`\(H_a\)`: The data is not normally distributed.
+
+
+---
+# Shapiro Wilk Test
+
+.pull-left[
+- Model_1 - `shapiro.test(resid(fit_2))`
+
+
+```
+## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  resid(fit_2)
+## W = 0.96299, p-value = 3.058e-15
+```
+
+]
+
+--
+
+.pull-right[
+
+- Model_2 - `shapiro.test(resid(fit_1))`
+
+
+
+```
+## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  resid(fit_1)
+## W = 0.99928, p-value = 0.9738
+```
+]
+
+--
+
+- Model_3 - `shapiro.test(resid(fit_3))`
+
+
+
+```
+## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  resid(fit_3)
+## W = 0.91364, p-value &lt; 2.2e-16
+```
+
+
+
+---
+class: inverse, center, middle
+
+# Using real data to assess model assumptions
+
+
+---
+
+# Example with real data
+
+To assess model assumptions using real data, we'll use the **`Lion Nose`** dataset.
+
+.pull-left[
+**Context**: Trophy hunting is frequently used (in a sustainable manner) to keep lion populations stable and to raise funds for conservation projects. Targeting older lions who have surpassed their breeding age has minimal effect on their population. However, hunting younger lions can lead to potential instability within the population. Here, Whitman and colleagues (2004) investigated the relationship between the blackness of a male lion's nose and its age.
+
+]
+
+.pull-right[
+![](images/Lion_NatGeo.avif)
+
+(source: [National Geographic](https://www.nationalgeographic.com/animals/mammals/facts/african-lion))
+
+]
+
+
+---
+
+# Load the data and Fit the model
+
+
+![](index_files/figure-html/unnamed-chunk-25-1.png)&lt;!-- --&gt;
+
+
+---
+# Load the data and Fit the model
+
+
+```
+## 
+## Call:
+## lm(formula = Age ~ PropBlack, data = Lion)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -2.5449 -1.1117 -0.5285  0.9635  4.3421 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   0.8790     0.5688   1.545    0.133    
+## PropBlack    10.6471     1.5095   7.053 7.68e-08 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.669 on 30 degrees of freedom
+## Multiple R-squared:  0.6238,	Adjusted R-squared:  0.6113 
+## F-statistic: 49.75 on 1 and 30 DF,  p-value: 7.677e-08
+```
+
+
+
+---
+
+# Check for homogeneity of variance
+
+.pull-left[
+
+![](index_files/figure-html/unnamed-chunk-27-1.png)&lt;!-- --&gt;
+
+]
+
+
+--
+
+.pull-right[
+
+
+```
+## 
+## 	studentized Breusch-Pagan test
+## 
+## data:  mod_fit
+## BP = 6.8946, df = 1, p-value = 0.008646
+```
+
+
+]
+
+--
+
+Here, the P value is &lt; 0.05, thus, we have evidence to reject the `\(H_0\)` (equal variance assumption is violated). Put simply, the residuals are **heteroscedastic**.
+
+
+
+---
+
+# Normality Assumption
+
+We will use the qqnorm to check for normality assumption and verify this using the shapiro test.
+
+.pull-left[
+
+![](index_files/figure-html/unnamed-chunk-29-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.pull-right[
+
+
+- Confirm with Shapiro Wilk Test
+
+
+```
+## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  resid(mod_fit)
+## W = 0.93879, p-value = 0.0692
+```
+
+]
+
+--
+
+From the Shapiro normality test, with a P-value &gt; 0.05, we have 'evidence' to conclude that this data is consistent with a normal distribution, as such **normality assumption** is met. 
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
